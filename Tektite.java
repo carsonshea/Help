@@ -50,29 +50,4 @@ public class Tektite extends Character {
 				g.drawImage(getDownImg(),(int)(getRect().getX()),(int)(getRect().getY()),(int)(getRect().getWidth()),(int)(getRect().getWidth()), null);
 		}
 	}
-	
-	public void keyHit(String s) {
-		if (s.equals("left")) {
-			getRect().translate(-10, 0);
-			direction = "left";
-			clicks++;
-		}
-		else if (s.equals("right")) {
-			this.getRect().translate(10, 0);
-			direction = "right";
-			clicks++;
-		}
-		else if (s.equals("up")) {
-			this.getRect().translate(0, -10);
-			direction = "up";
-			clicks++;
-		}
-		else if (s.equals("down")) {
-			this.getRect().translate(0, 10);
-			direction = "down";
-			clicks++;
-		}
-	}
-	
-	
 }
