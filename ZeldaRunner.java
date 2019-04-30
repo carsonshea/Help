@@ -14,17 +14,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 
-/*String sound = "overworld.mp3";
-Media hit = new Media(new File(sound).toURI().toString());
-MediaPlayer mediaPlayer = new MediaPlayer(hit);
-mediaPlayer.play();
-*/
 public class ZeldaRunner {
 	static Player link = new Player();
 	JPanel panel;
+	Octorok rok = new Octorok();
+	Tektite spider = new Tektite();
 	
 	public static void main(String[] args) {
 		new ZeldaRunner().start();
@@ -91,16 +86,27 @@ public class ZeldaRunner {
 				hit("down");
 			}
 		});
-
+		
+		panel.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "space");
+		panel.getActionMap().put("space", new AbstractAction() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				hit("space");
+			}
+		});
 	}
 	public  void hit(String s) {
 		link.keyHit(s);
+		rok.keyHit(s);
+		spider.keyHit(s);
 		panel.repaint();
 	}
 	
-	protected static void drawAll(Graphics g) {
+	protected void drawAll(Graphics g) {
 		link.draw(g);
-		
+		rok.draw(g);
+		spider.draw(g);
 	}
 
 }
