@@ -15,20 +15,25 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
 import java.io.*;
+import java.util.ArrayList;
+
 import javax.sound.sampled.*;
-
-
-
 
 
 public class ZeldaRunner {
 	static Player link = new Player();
 	JPanel panel;
+	ArrayList<Character> enemies = new ArrayList<Character>();
 	Timer timer;
+	Timer attack;
+	Timer enemy;
+    //Environment envo = new Environment(link);
 	boolean soundOn=false;
 	boolean alive=true;
 	static Clip audio;
 	int t = 0;
+	int ticks = 1;
+	int time;
 	Clip audioAlive=get("overworld.wav");
 	Clip audioDungeon=get("dungeon.wav");
 	Clip audioGameOver=get("gameover.wav");
@@ -38,6 +43,8 @@ public class ZeldaRunner {
 	}
 
 	private void start() {
+		enemies.add(new Octorok());
+		enemies.add(new Tektite());
 		JFrame frame = new JFrame("Runner");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		panel = new JPanel() {
@@ -63,21 +70,58 @@ public class ZeldaRunner {
 			}
 		});
 		timer.start();
+		
+		attack = new Timer(300, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				attack();
+				panel.repaint();
+			}
+		});
+		enemy = new Timer(200, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				enemyMove();
+				panel.repaint();
+			}
+		});
+		enemy.start();
+	}
+
+	protected void enemyMove() {
+		time++;
+		if (time == 28)
+			time = 0;
+		for (Character c: enemies) {
+			c.movePattern(time);
+		}
+		
+	}
+
+	protected void attack() {
+		ticks++;
+		//if (ticks % 100 != 0) {
+		attackCheck();
+		link.falseSpace();
+		attack.restart();
+		//}
+		
 	}
 
 	protected void updateGame() {
+		//System.out.println(t);
 		if (audioAlive.isRunning()==true||audioDungeon.isRunning()==true||audioGameOver.isRunning()==true) {
 			soundOn=true;
 		}else {
 			soundOn=false;
 		}
-		while (soundOn==false&&alive==true) {
+		if (soundOn==false&&alive==true) {
 			audioAlive.loop(Clip.LOOP_CONTINUOUSLY);
 		}
 		if (soundOn==false&&alive==false) {
 			audioGameOver.start();
 		}
-		while (alive==false) {
+		if (alive==false) {
 			if (audioAlive.isRunning()==true) {
 				audioAlive.stop();	
 			}
@@ -89,7 +133,7 @@ public class ZeldaRunner {
 	private void mapKeyStrokesToActions(JPanel panel) {
 		ActionMap map = panel.getActionMap();
 		InputMap inMap = panel.getInputMap();
-
+		
 		inMap.put(KeyStroke.getKeyStroke("pressed UP"), "up");
 		map.put("up", new AbstractAction() {
 			@Override
@@ -126,17 +170,39 @@ public class ZeldaRunner {
 				hit("down");
 			}
 		});
-		
-
+        
+        panel.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "space");
+        panel.getActionMap().put("space", new AbstractAction() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hit("space");
+            }
+        });
 	}
 	public  void hit(String s) {
 		link.keyHit(s);
+		if (s.equals("space")) {
+			attack.start();
+		}
 		panel.repaint();
 	}
 	
-	protected static void drawAll(Graphics g) {
+	private void attackCheck() {
+		for(int i = 0; i < enemies.size(); i++) {
+			if (link.getSwordRect().intersects(enemies.get(i).getRect()) && link.getSpace() == true) {
+				enemies.get(i).setAlive(false);
+				enemies.remove(i);
+			}
+		}
+	}
+
+	protected void drawAll(Graphics g) {
 		link.draw(g);
-		
+		for (Character c : enemies) {
+			c.draw(g);
+		}
+		//envo.draw(g);
 	}
 	public static Clip get(String filename){
 		Clip audios = null;
